@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="style.xsl"?>
+
+<school>
+
+  <grades>
+    <grade min="250">A</grade>
+    <grade min="200">B</grade>
+    <grade min="150">C</grade>
+    <grade min="0">Fail</grade>
+  </grades>
+
+  <student id="S101">
+    <name>Asha</name>
+    <class>10</class>
+    <marks>
+      <math>85</math><science>78</science><english>92</english>
+    </marks>
+  </student>
+
+  <student id="S102">
+    <name>Rahul</name>
+    <class>10</class>
+    <marks>
+      <math>45</math><science>52</science><english>60</english>
+    </marks>
+  </student>
+
+  <student id="S103">
+    <name>Meena</name>
+    <class>9</class>
+    <marks>
+      <math>91</math><science>88</science><english>95</english>
+    </marks>
+  </student>
+
+  <student id="S104">
+    <name>Kavi</name>
+    <class>9</class>
+    <marks>
+      <math>70</math><science>75</science><english>80</english>
+    </marks>
+  </student>
+
+</school>
