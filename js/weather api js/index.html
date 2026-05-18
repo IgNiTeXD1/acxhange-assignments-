@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Weather</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+</head>
+
+<body>
+
+  <main class="app">
+
+    <section class="weather-card">
+
+      <header class="header">
+
+        <div>
+
+          <p class="tiny">
+            WEATHER APP
+          </p>
+
+          <h1>
+            Forecast
+          </h1>
+
+        </div>
+
+        <div class="status-dot"></div>
+
+      </header>
+
+      <div class="searchbox">
+
+        <input
+          type="text"
+          id="cityinput"
+          placeholder="Search city..."
+        >
+
+        <button id="searchbutton">
+          Search
+        </button>
+
+      </div>
+
+      <section id="weatherscreen">
+
+        <div class="empty-state">
+
+          <div class="weather-icon">
+            ☁
+          </div>
+
+          <h2>
+            No Weather Data
+          </h2>
+
+          <p>
+            Search any city to get
+            realtime forecast
+          </p>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

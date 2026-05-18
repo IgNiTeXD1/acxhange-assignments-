@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Teams Style Planner</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <h1>Weekly Planner</h1>
+  </div>
+
+  <div id="planner"></div>
+
+  <div id="modal" class="modal">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2 id="modalDay"></h2>
+
+        <button onclick="closeModal()">
+          ✕
+        </button>
+      </div>
+
+      <input
+        type="text"
+        id="taskInput"
+        placeholder="Enter task..."
+      />
+
+      <button id="saveBtn">
+        Save Task
+      </button>
+
+    </div>
+
+  </div>
+
+  <script type = "module" src="script.js"></script>
+
+</body>
+</html>
