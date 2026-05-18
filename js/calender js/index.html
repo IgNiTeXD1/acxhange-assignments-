@@ -1,31 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Teams Style Planner</title>
+  <meta charset="UTF-8"/>
 
-  <link rel="stylesheet" href="style.css">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Weekly Planner
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
+
 </head>
+
 <body>
 
   <div class="topbar">
-    <h1>Weekly Planner</h1>
+
+    <h1>
+      Weekly Planner
+    </h1>
+
+    <div class="topbar-actions">
+
+      <button id="weekBtn">
+        Tasks Of Week
+      </button>
+
+      <button id="searchBtn">
+        Search Tasks
+      </button>
+
+    </div>
+
   </div>
 
+
   <div id="planner"></div>
+
+
+  <!-- TASK MODAL -->
 
   <div id="modal" class="modal">
 
     <div class="modal-content">
 
       <div class="modal-header">
+
         <h2 id="modalDay"></h2>
 
-        <button onclick="closeModal()">
+        <button id="closeModalBtn">
           ✕
         </button>
+
       </div>
 
       <input
@@ -42,7 +77,74 @@
 
   </div>
 
-  <script type = "module" src="script.js"></script>
+
+  <!-- WEEK MODAL -->
+
+  <div
+    id="weekModal"
+    class="tasks-view-modal"
+  >
+
+    <div class="tasks-view-content">
+
+      <div class="tasks-view-header">
+
+        <h2>
+          Weekly Tasks
+        </h2>
+
+        <button id="closeWeekBtn">
+          ✕
+        </button>
+
+      </div>
+
+      <div id="weekTasks"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- SEARCH MODAL -->
+
+  <div
+  id="searchModal"
+  class="tasks-view-modal"
+>
+
+  <div class="tasks-view-content">
+
+    <div class="tasks-view-header">
+
+      <h2>
+        Search Tasks
+      </h2>
+
+      <button id="closeSearchBtn">
+        ✕
+      </button>
+
+    </div>
+
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Search task..."
+    />
+
+    <div id="searchResults"></div>
+
+  </div>
+
+</div>
+
+
+  <script
+    type="module"
+    src="script.js"
+  ></script>
 
 </body>
+
 </html>

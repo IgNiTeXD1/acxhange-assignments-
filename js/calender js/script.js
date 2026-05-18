@@ -1,155 +1,105 @@
-
 import Dexie from "https://unpkg.com/dexie@latest/dist/dexie.mjs";
 
-
-/* =========================
-   DATABASE
-========================= */
-
-const db = new Dexie("TaskPlannerDB");
+const db=new Dexie("TaskPlannerDB");
 
 db.version(1).stores({
-  tasks: "++id,key,text,completed"
+  tasks:"++id,key,text,completed"
 });
 
-
-
-/* =========================
-   STATIC DATA
-========================= */
-
-const days = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday"
+const days=[
+  "Monday","Tuesday","Wednesday",
+  "Thursday","Friday","Saturday","Sunday"
 ];
 
-const hours = [...Array(24)].map((_, i) =>
-  `${String(i).padStart(2, "0")}:00`
+const hours=[...Array(24)].map((_,i)=>
+  `${String(i).padStart(2,"0")}:00`
 );
 
+const planner=document.getElementById("planner");
+
+const modal=document.getElementById("modal");
+const modalDay=document.getElementById("modalDay");
+const taskInput=document.getElementById("taskInput");
+
+const saveBtn=document.getElementById("saveBtn");
+const closeModalBtn=document.getElementById("closeModalBtn");
+
+const weekBtn=document.getElementById("weekBtn");
+const weekModal=document.getElementById("weekModal");
+const weekTasks=document.getElementById("weekTasks");
+const closeWeekBtn=document.getElementById("closeWeekBtn");
+
+const searchBtn=document.getElementById("searchBtn");
+const searchModal=document.getElementById("searchModal");
+const closeSearchBtn=document.getElementById("closeSearchBtn");
+const searchInput=document.getElementById("searchInput");
+const searchResults=document.getElementById("searchResults");
+
+let selectedKey="";
+let tasks={};
 
 
-/* =========================
-   DOM
-========================= */
+/* LOAD */
 
-const planner = document.getElementById("planner");
+async function loadTasks(){
 
-const modal = document.getElementById("modal");
-
-const modalDay =
-  document.getElementById("modalDay");
-
-const taskInput =
-  document.getElementById("taskInput");
-
-const saveBtn =
-  document.getElementById("saveBtn");
-
-
-
-/* =========================
-   STATE
-========================= */
-
-let selectedKey = "";
-
-let tasks = {};
-
-
-
-/* =========================
-   LOAD TASKS
-========================= */
-
-async function loadTasks() {
-
-  const allTasks =
+  const allTasks=
     await db.tasks.toArray();
 
-  tasks = {};
+  tasks={};
 
+  allTasks.forEach(task=>{
 
-
-  allTasks.forEach(task => {
-
-    if (!tasks[task.key]) {
-      tasks[task.key] = [];
-    }
+    tasks[task.key] ||= [];
 
     tasks[task.key].push(task);
 
   });
-
-
 
   renderPlanner();
 
 }
 
 
+/* RENDER */
 
-/* =========================
-   RENDER
-========================= */
+function renderPlanner(){
 
-function renderPlanner() {
-
-  planner.innerHTML = `
-
+  planner.innerHTML=`
     <div class="header">
       Time
     </div>
 
-    ${days.map(day => `
-
-      <div class="header">
-        ${day}
-      </div>
-
-    `).join("")}
-
+    ${days.map(day=>
+      `<div class="header">${day}</div>`
+    ).join("")}
   `;
 
-
-
-  hours.forEach(hour => {
+  hours.forEach(hour=>{
 
     planner.innerHTML += `
-
       <div class="time">
         ${hour}
       </div>
-
     `;
 
+    days.forEach(day=>{
 
-
-    days.forEach(day => {
-
-      const key = `${day}-${hour}`;
+      const key=
+        `${day}-${hour}`;
 
       tasks[key] ||= [];
-
-
 
       planner.innerHTML += `
 
         <div
           class="cell"
-          onclick="openModal('${key}')"
+          data-key="${key}"
         >
 
-          ${tasks[key].map((task, index) => `
+          ${tasks[key].map((task,index)=>`
 
-            <div
-              class="task ${task.completed ? "completed" : ""}"
-            >
+            <div class="task ${task.completed?"completed":""}">
 
               <div class="task-top">
 
@@ -161,30 +111,27 @@ function renderPlanner() {
 
                   <button
                     class="complete-btn"
-                    onclick="
-                      event.stopPropagation();
-                      toggleTask('${key}', ${index})
-                    "
+                    data-action="toggle"
+                    data-key="${key}"
+                    data-index="${index}"
                   >
                     ✓
                   </button>
 
                   <button
                     class="edit-btn"
-                    onclick="
-                      event.stopPropagation();
-                      editTask('${key}', ${index})
-                    "
+                    data-action="edit"
+                    data-key="${key}"
+                    data-index="${index}"
                   >
                     Edit
                   </button>
 
                   <button
                     class="delete-btn"
-                    onclick="
-                      event.stopPropagation();
-                      deleteTask('${key}', ${index})
-                    "
+                    data-action="delete"
+                    data-key="${key}"
+                    data-index="${index}"
                   >
                     X
                   </button>
@@ -208,175 +155,301 @@ function renderPlanner() {
 }
 
 
+/* MODAL */
 
-/* =========================
-   MODAL
-========================= */
+function openModal(key){
 
-function openModal(key) {
+  selectedKey=key;
 
-  selectedKey = key;
+  modal.style.display="flex";
 
-  modal.style.display = "flex";
+  modalDay.innerText=key;
 
-  modalDay.innerText = key;
-
-  taskInput.value = "";
+  taskInput.value="";
 
 }
 
-window.openModal = openModal;
+function closeModal(){
+  modal.style.display="none";
+}
 
 
+/* ADD TASK */
 
-function closeModal() {
+async function addTask(){
 
-  modal.style.display = "none";
+  const text=
+    taskInput.value.trim();
+
+  if(!text) return;
+
+  await db.tasks.add({
+    key:selectedKey,
+    text,
+    completed:false
+  });
+
+  closeModal();
+
+  await loadTasks();
 
 }
 
 
+/* TOGGLE */
 
-/* =========================
-   ADD TASK
-========================= */
+async function toggleTask(key,index){
 
-saveBtn.addEventListener(
+  const task=
+    tasks[key][index];
+
+  await db.tasks.update(task.id,{
+    completed:!task.completed
+  });
+
+  await loadTasks();
+
+}
+
+
+/* EDIT */
+
+async function editTask(key,index){
+
+  const task=
+    tasks[key][index];
+
+  const updated=prompt(
+    "Edit Task",
+    task.text
+  );
+
+  if(
+    updated===null ||
+    updated.trim()===""
+  ) return;
+
+  await db.tasks.update(task.id,{
+    text:updated.trim()
+  });
+
+  await loadTasks();
+
+}
+
+
+/* DELETE */
+
+async function deleteTask(key,index){
+
+  const task=
+    tasks[key][index];
+
+  await db.tasks.delete(task.id);
+
+  await loadTasks();
+
+}
+
+
+/* WEEK TASKS */
+
+async function viewWeekTasks(){
+
+  const allTasks=
+    await db.tasks.toArray();
+
+  allTasks.sort((a,b)=>
+    a.key.localeCompare(b.key)
+  );
+
+  weekTasks.innerHTML=
+    allTasks.map(task=>`
+
+      <div class="week-task">
+
+        <div>
+          <strong>${task.key}</strong>
+        </div>
+
+        <div>
+          ${task.text}
+        </div>
+
+        <div>
+          ${
+            task.completed
+            ? "Completed"
+            : "Pending"
+          }
+        </div>
+
+      </div>
+
+    `).join("");
+
+  weekModal.style.display="flex";
+
+}
+
+
+/* SEARCH */
+
+async function searchTasks(query=""){
+
+  const allTasks=
+    await db.tasks.toArray();
+
+  const filtered=
+    allTasks.filter(task=>
+
+      task.text
+        .toLowerCase()
+        .includes(
+          query.toLowerCase()
+        )
+
+    );
+
+  filtered.sort((a,b)=>
+    a.key.localeCompare(b.key)
+  );
+
+  searchResults.innerHTML=
+
+    filtered.map(task=>`
+
+      <div class="week-task">
+
+        <div>
+          <strong>${task.key}</strong>
+        </div>
+
+        <div>
+          ${task.text}
+        </div>
+
+        <div>
+          ${
+            task.completed
+            ? "Completed"
+            : "Pending"
+          }
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+/* GRID EVENTS */
+
+planner.addEventListener(
   "click",
-  async () => {
+  async e=>{
 
-    const text =
-      taskInput.value.trim();
+    const cell=
+      e.target.closest(".cell");
 
-    if (!text) return;
+    if(
+      cell &&
+      !e.target.dataset.action
+    ){
+      openModal(
+        cell.dataset.key
+      );
+    }
 
+    const action=
+      e.target.dataset.action;
 
+    if(!action) return;
 
-    await db.tasks.add({
+    const key=
+      e.target.dataset.key;
 
-      key: selectedKey,
+    const index=
+      e.target.dataset.index;
 
-      text,
+    if(action==="toggle"){
+      await toggleTask(key,index);
+    }
 
-      completed: false
+    if(action==="edit"){
+      await editTask(key,index);
+    }
 
-    });
-
-
-
-    closeModal();
-
-    await loadTasks();
+    if(action==="delete"){
+      await deleteTask(key,index);
+    }
 
   }
 );
 
 
+/* BUTTON EVENTS */
 
-/* =========================
-   TOGGLE TASK
-========================= */
+saveBtn.addEventListener(
+  "click",
+  addTask
+);
 
-async function toggleTask(
-  key,
-  index
-) {
+closeModalBtn.addEventListener(
+  "click",
+  closeModal
+);
+console.log(closeModalBtn);
+console.log(searchInput);
+console.log(searchBtn);
 
-  const task =
-    tasks[key][index];
+weekBtn.addEventListener(
+  "click",
+  viewWeekTasks
+);
 
-
-
-  await db.tasks.update(task.id, {
-
-    completed: !task.completed
-
-  });
-
-
-
-  await loadTasks();
-
-}
-
-window.toggleTask = toggleTask;
-
-
-
-/* =========================
-   EDIT TASK
-========================= */
-
-async function editTask(
-  key,
-  index
-) {
-
-  const task =
-    tasks[key][index];
-
-
-
-  const updated = prompt(
-    "Edit Task",
-    task.text
-  );
-
-
-
-  if (
-    updated === null ||
-    updated.trim() === ""
-  ) {
-    return;
+closeWeekBtn.addEventListener(
+  "click",
+  ()=>{
+    weekModal.style.display="none";
   }
+);
+
+searchBtn.addEventListener(
+  "click",
+  async()=>{
+
+    searchModal.style.display=
+      "flex";
+
+    searchInput.value="";
+
+    await searchTasks();
+
+  }
+);
 
 
+closeSearchBtn.addEventListener(
+  "click",
+  ()=>{
+    searchModal.style.display="none";
+  }
+);
 
-  await db.tasks.update(task.id, {
+searchInput.addEventListener(
+  "input",
+  async e=>{
 
-    text: updated.trim()
+    await searchTasks(
+      e.target.value
+    );
 
-  });
-
-
-
-  await loadTasks();
-
-}
-
-window.editTask = editTask;
-
-
-
-/* =========================
-   DELETE TASK
-========================= */
-
-async function deleteTask(
-  key,
-  index
-) {
-
-  const task =
-    tasks[key][index];
+  }
+);
 
 
-
-  await db.tasks.delete(task.id);
-
-
-
-  await loadTasks();
-
-}
-
-window.deleteTask = deleteTask;
-
-
-
-/* =========================
-   INITIAL LOAD
-========================= */
+/* INIT */
 
 loadTasks();
